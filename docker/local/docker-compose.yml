@@ -3,12 +3,24 @@ version: '3.9'
 services:
   ## Services from the first file
   rootchain:
-    image: nginx:latest
+    image: ghcr.io/0xpolygon/go-ethereum-console:latest
     container_name: blade-rootchain
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    command: [
+      "--dev",
+      "--dev.period", "2",
+      "--datadir", "/eth1data",
+      "--ipcpath", "/eth1data/geth.ipc",
+      "--http",
+      "--http.addr", "0.0.0.0",
+      "--http.vhosts", "*",
+      "--http.api", "eth,net,web3,debug",
+      "--ws",
+      "--ws.addr", "0.0.0.0"
+    ]
     ports:
       - '8545:8545'
+    volumes:
+      - eth1data:/eth1data
     networks:
       - blade-docker-network
 

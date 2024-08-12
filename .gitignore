@@ -2,3 +2,5 @@
 /docker/local/services/blockscout-db-data
 /docker/local/services/stats-db-data
 /docker/local/services/blockscout-db-data
+/docker/local/services/logs
+/docker/local/services/redis-data
