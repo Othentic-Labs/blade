@@ -1,4 +1,0 @@
-2024-08-11T12:03:10.382 application=block_scout_web [info] Broadcast smart-contract 0x08e0e9643ab61c87d971288be9276a6aa95e53a3: eth_bytecode_db_lookup_started
-2024-08-11T12:03:11.436 application=block_scout_web [info] Broadcast smart-contract 0x08e0e9643ab61c87d971288be9276a6aa95e53a3: smart_contract_was_verified
-2024-08-11T12:04:22.990 application=block_scout_web [info] Broadcast smart-contract 0xa1dfe8536732eb98bbca36a7f97c72e3395eab8e: eth_bytecode_db_lookup_started
-2024-08-11T12:04:26.072 application=block_scout_web [info] Broadcast smart-contract 0xa1dfe8536732eb98bbca36a7f97c72e3395eab8e: smart_contract_was_not_verified
