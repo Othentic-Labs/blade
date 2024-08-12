@@ -26,6 +26,9 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
+    'othentic-blade': {
+      url: 'http://localhost/api/eth-rpc'
+    },
     root: {
       url: process.env.ROOT_RPC || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
@@ -54,11 +57,18 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY !== undefined ? process.env.ETHERSCAN_API_KEY : "",
-      goerli: process.env.ETHERSCAN_API_KEY !== undefined ? process.env.ETHERSCAN_API_KEY : "",
-      polygon: process.env.POLYGONSCAN_API_KEY !== undefined ? process.env.POLYGONSCAN_API_KEY : "",
-      polygonMumbai: process.env.POLYGONSCAN_API_KEY !== undefined ? process.env.POLYGONSCAN_API_KEY : "",
+      'othentic-blade': 'empty'
     },
+    customChains: [
+      {
+        network: "othentic-blade",
+        chainId: 51001,
+        urls: {
+          apiURL: "http://localhost/api",
+          browserURL: "http://localhost"
+        }
+      }
+    ]
   },
   mocha: {
     timeout: 100000000,
