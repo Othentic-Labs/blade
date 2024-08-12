@@ -1,5 +1,42 @@
 #!/usr/bin/env bash
 
+# Function to check if a command is available
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to check dependencies
+check_dependencies() {
+    local missing_deps=()
+
+    # Check for Docker
+    if ! command_exists docker; then
+        missing_deps+=("Docker")
+    fi
+
+    # Check for Docker Compose
+    if ! command_exists docker-compose; then
+        missing_deps+=("Docker Compose")
+    fi
+
+    # Add checks for any other dependencies here
+    # For example:
+    # if ! command_exists jq; then
+    #     missing_deps+=("jq")
+    # fi
+
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        echo "Error: The following dependencies are missing:"
+        for dep in "${missing_deps[@]}"; do
+            echo "  - $dep"
+        done
+        echo "Please install the missing dependencies and try again."
+        exit 1
+    fi
+
+    echo "All dependencies are installed."
+}
+
 show_help() {
     echo "Usage: run.sh [OPTIONS]"
     echo ""
@@ -34,6 +71,9 @@ destroy_environment() {
     
     echo "Docker environment destroyed successfully."
 }
+
+# Check dependencies before proceeding
+check_dependencies
 
 case "$1" in
     --destroy)
