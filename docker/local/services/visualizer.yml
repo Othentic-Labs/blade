@@ -9,3 +9,5 @@ services:
     container_name: 'visualizer'
     env_file:
       -  ../envs/common-visualizer.env
+    networks:
+      - blade-docker-network

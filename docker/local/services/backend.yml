@@ -14,3 +14,5 @@ services:
       -  ../envs/common-blockscout.env
     volumes:
       - ./logs/:/app/logs/
+    networks:
+      - blade-docker-network  

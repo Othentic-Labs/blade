@@ -7,3 +7,5 @@ services:
     command: redis-server
     volumes:
       - ./redis-data:/data
+    networks:
+      - blade-docker-network
