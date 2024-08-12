@@ -63,7 +63,7 @@ destroy_environment() {
 
 # Function to check if all services are healthy
 check_services_health() {
-    local timeout=300  # 5 minutes timeout
+    local timeout=600 #10 minutes 
     local start_time=$(date +%s)
     
     while true; do
