@@ -1,0 +1,144 @@
+version: '3.9'
+
+services:
+  ## RUN ROOTCHAIN AS NGINX REVERSE PROXY
+  rootchain:
+    image: nginx:latest
+    container_name: blade-rootchain
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - '8545:8545'
+    networks:
+      - blade-docker-network
+
+  ## INITIALIZE GENESIS AND SECRETS, ETC.
+  init:
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile
+    image: local/blade
+    container_name: blade-bootstrapper
+    command: [ "init", "${EDGE_CONSENSUS:-polybft}" ]
+    depends_on:
+      rootchain:
+        condition: service_started
+    volumes:
+      - data:/data
+    networks:
+      - blade-docker-network
+
+  # RUN NODES
+  node-1:
+    image: local/blade
+    container_name: blade-validator-1
+    command: [ "start-node-1", "${EDGE_CONSENSUS:-polybft}" ]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      rootchain:
+        condition: service_started
+    ports:
+      - '10000:9632'
+      - '10002:8545'
+      - '10003:5001'
+    volumes:
+      - data:/data
+    networks:
+      - blade-docker-network
+    restart: on-failure
+
+  node-2:
+    image: local/blade
+    container_name: blade-validator-2
+    command: [
+      "server",
+      "--data-dir",
+      "/data/data-2",
+      "--chain", "/data/genesis.json",
+      "--grpc-address", "0.0.0.0:9632",
+      "--libp2p", "0.0.0.0:1478",
+      "--jsonrpc", "0.0.0.0:8545",
+      "--prometheus", "0.0.0.0:5001",
+      "--seal"
+    ]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      rootchain:
+        condition: service_started
+    ports:
+      - '20000:9632'
+      - '20002:8545'
+      - '20003:5001'
+    volumes:
+      - data:/data
+    networks:
+      - blade-docker-network
+    restart: on-failure
+
+  node-3:
+    image: local/blade
+    container_name: blade-validator-3
+    command: [
+      "server",
+      "--data-dir", "/data/data-3",
+      "--chain", "/data/genesis.json",
+      "--grpc-address", "0.0.0.0:9632",
+      "--libp2p", "0.0.0.0:1478",
+      "--jsonrpc", "0.0.0.0:8545",
+      "--prometheus", "0.0.0.0:5001",
+      "--seal"
+    ]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      rootchain:
+        condition: service_started
+    ports:
+      - '30000:9632'
+      - '30002:8545'
+      - '30003:5001'
+    volumes:
+      - data:/data
+    networks:
+      - blade-docker-network
+    restart: on-failure
+
+  node-4:
+    image: local/blade
+    container_name: blade-validator-4
+    command: [
+      "server",
+      "--data-dir",  "/data/data-4",
+      "--chain", "/data/genesis.json",
+      "--grpc-address", "0.0.0.0:9632",
+      "--libp2p", "0.0.0.0:1478",
+      "--jsonrpc", "0.0.0.0:8545",
+      "--prometheus", "0.0.0.0:5001",
+      "--seal"
+    ]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      rootchain:
+        condition: service_started
+    ports:
+      - '40000:9632'
+      - '40002:8545'
+      - '40003:5001'
+    volumes:
+      - data:/data
+    networks:
+      - blade-docker-network
+    restart: on-failure
+
+networks:
+  blade-docker-network:
+    driver: bridge
+    name: blade-docker-network
+
+volumes:
+  data:
+  eth1data:
+  genesis:
