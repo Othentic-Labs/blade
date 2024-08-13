@@ -2,6 +2,9 @@
 
 set -e
 
+echo "Waiting for rootchain to be ready..."
+sleep 30
+
 BLADE_BIN=./blade
 CHAIN_CUSTOM_OPTIONS=$(tr "\n" " " << EOL
 --block-gas-limit 10000000
@@ -9,8 +12,7 @@ CHAIN_CUSTOM_OPTIONS=$(tr "\n" " " << EOL
 --chain-id 51001
 --name Blade
 --premine 0x0000000000000000000000000000000000000000
---premine 0x228466F2C715CbEC05dEAbfAc040ce3619d7CF0B:0xD3C21BCECCEDA1000000
---premine 0xca48694ebcB2548dF5030372BE4dAad694ef174e:0xD3C21BCECCEDA1000000
+--premine 0x80cd9D056bc38ECA50cF74A7b9F4d0FB897152a2:0xD3C21BCECCEDA1000000
 EOL
 )
 
@@ -43,7 +45,7 @@ case "$1" in
 
               rm -f /data/genesis.json
 
-              proxyContractsAdmin=0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed
+              proxyContractsAdmin=0x80cd9D056bc38ECA50cF74A7b9F4d0FB897152a2
 
               createGenesisConfig "$2" "$secrets" \
                 --reward-wallet 0xDEADBEEF:1000000 \

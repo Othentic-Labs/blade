@@ -3,24 +3,12 @@ version: '3.9'
 services:
   ## Services from the first file
   rootchain:
-    image: ghcr.io/0xpolygon/go-ethereum-console:latest
+    image: nginx:latest
     container_name: blade-rootchain
-    command: [
-      "--dev",
-      "--dev.period", "2",
-      "--datadir", "/eth1data",
-      "--ipcpath", "/eth1data/geth.ipc",
-      "--http",
-      "--http.addr", "0.0.0.0",
-      "--http.vhosts", "*",
-      "--http.api", "eth,net,web3,debug",
-      "--ws",
-      "--ws.addr", "0.0.0.0"
-    ]
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - '8545:8545'
-    volumes:
-      - eth1data:/eth1data
     networks:
       - blade-docker-network
 
@@ -187,6 +175,7 @@ services:
         ETHEREUM_JSONRPC_HTTP_URL: http://blade-validator-1:8545/
         ETHEREUM_JSONRPC_TRACE_URL: http://blade-validator-1:8545/
         CHAIN_ID: '51001'
+
 
   visualizer:
     extends:
