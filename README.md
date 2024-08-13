@@ -53,12 +53,30 @@ Options:
 
 The Othentic Blade network implements a cross-chain bridge mechanism to facilitate message passing between Layer 1 (L1) and Layer 2 (L2). This bridge allows for secure and verifiable communication between the two layers, enabling various cross-chain applications and functionalities.
 
+### Example
+Full examples of the bridge process can be found here:
+
+https://github.com/Othentic-Labs/AttestationNetwork/blob/main/bridge/SyncL1WithL2.js
+https://github.com/Othentic-Labs/AttestationNetwork/blob/main/bridge/SyncL2WithL1.js
+
 ### Bridge Architecture
 
 The bridge consists of several key components:
 
 1. **StateSender Contract**: Deployed on both L1 and L2, this contract initiates the cross-layer message passing.
-2. **Receiver Contract**: Deployed on the destination layer (L1 or L2), this contract implements IStateReceiver or IL2StateReceiver accepts and stores the bridged messages.
+2. **Receiver Contract**: Deployed on the destination layer (L1 or L2), this contract accepts and stores the bridged messages. 
+   - On L2, it must implement the `IStateReceiver` interface:
+     ```solidity
+     interface IStateReceiver {
+         function onStateReceive(uint256 counter, address sender, bytes calldata data) external;
+     }
+     ```
+   - On L1, it must implement the `IL2StateReceiver` interface:
+     ```solidity
+     interface IL2StateReceiver {
+         function onL2StateReceive(uint256 counter, address sender, bytes calldata data) external;
+     }
+     ```
 3. **ExitHelper Contract**: Deployed on L1, this contract facilitates the proof verification and message passing from L2 to L1.
 
 ### Bridging Process
@@ -111,6 +129,10 @@ You can customize the network by modifying the `docker-compose.yml` file and the
 - Adjusting network parameters in the genesis configuration
 - Modifying resource allocations for containers
 - Adding or removing services
+
+## L1 Contract Deployments
+
+You can find the addresses of contracts deployed on L1 on genesis.json file
 
 ## L2 Contract Deployments
 
