@@ -110,12 +110,14 @@ show_ascii_art() {
 # Check dependencies before proceeding
 check_dependencies
 
+# Always show ASCII art
+show_ascii_art
+
 case "$1" in
     --destroy)
         destroy_environment
         ;;
     --local)
-        show_ascii_art
         echo "Running local environment..."
         cd docker/local
         docker-compose up -d
@@ -124,7 +126,6 @@ case "$1" in
         fi
         ;;
     --holesky)
-        show_ascii_art
         echo "Running Holesky environment..."
         cd docker/local
         docker-compose -f docker-compose_holesky.yml up -d
