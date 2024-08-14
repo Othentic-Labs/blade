@@ -24,7 +24,9 @@ deployERC20() {
     "DanielToken" \
     "DAN" \
     18 \
-    "1000000"
+    "100000000000000000000000000" \
+    "$addresses"
+
   ERC20_ADDRESS=$(cat /data/erc20_address.txt)
   echo "ERC20 token deployed at address: $ERC20_ADDRESS"
 }
@@ -60,6 +62,10 @@ case "$1" in
 
               proxyContractsAdmin=0x80cd9D056bc38ECA50cF74A7b9F4d0FB897152a2
 
+              addresses="$(echo "$secrets" | jq -r '.[0] | .address'),$(echo "$secrets" | jq -r '.[1] | .address'),$(echo "$secrets" | jq -r '.[2] | .address'),$(echo "$secrets" | jq -r '.[3] | .address')"
+              
+              echo "Addresses: $addresses"
+
               "$BLADE_BIN" bridge fund \
                 --json-rpc http://rootchain:8545 \
                 --addresses ${proxyContractsAdmin} \
@@ -82,7 +88,6 @@ case "$1" in
                 --erc20-token ${ERC20_ADDRESS} \
                 --test
 
-              addresses="$(echo "$secrets" | jq -r '.[0] | .address'),$(echo "$secrets" | jq -r '.[1] | .address'),$(echo "$secrets" | jq -r '.[2] | .address'),$(echo "$secrets" | jq -r '.[3] | .address')"
 
               "$BLADE_BIN" bridge fund \
                 --json-rpc http://rootchain:8545 \
