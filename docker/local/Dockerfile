@@ -22,8 +22,8 @@ RUN make build VERBOSE=1
 # Use the Alpine image for running the application
 FROM alpine:latest AS runner
 
-# Install necessary packages
-RUN apk --no-cache add ca-certificates jq
+# Install necessary packages including Node.js, npm, and dependencies for Foundry
+RUN apk add --no-cache ca-certificates jq nodejs npm curl
 
 # Set the working directory
 WORKDIR /blade
@@ -38,9 +38,17 @@ COPY --from=builder /blade/blade ./
 # Copy the blade.sh script to the working directory
 COPY docker/local/blade.sh ./
 
+# Copy the deploy_erc20.js script to the working directory
+COPY docker/local/scripts/deploy_erc20.js ./
+COPY docker/local/scripts/erc20.abi ./
+COPY docker/local/scripts/erc20.bin ./
+
+
+# Install ethers.js package using npm
+RUN npm install ethers@latest
+
 # Expose ports for JSON-RPC, libp2p, and gRPC
 EXPOSE 8545 9632 1478 5001
 
 # Set the entrypoint to run the blade.sh script
 ENTRYPOINT ["./blade.sh"]
-

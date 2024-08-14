@@ -11,10 +11,23 @@ CHAIN_CUSTOM_OPTIONS=$(tr "\n" " " << EOL
 --epoch-size 10
 --chain-id 51001
 --name Blade
---premine 0x0000000000000000000000000000000000000000
---premine 0x80cd9D056bc38ECA50cF74A7b9F4d0FB897152a2:0xD3C21BCECCEDA1000000
+--premine 0x0000000000000000000000000000000000000000:0xD3C21BCECCEDA1000000
 EOL
 )
+
+# Deploy the ERC20 token using Node.js script
+deployERC20() {
+  echo "Deploying ERC20 token on the rootchain..."
+  node deploy_erc20.js \
+    "http://rootchain:8545" \
+    "71394bcfed7228c0a33a9e65b42ba8ce8a697ffdf15dc862aa7aece27819e938" \
+    "DanielToken" \
+    "DAN" \
+    18 \
+    "1000000"
+  ERC20_ADDRESS=$(cat /data/erc20_address.txt)
+  echo "ERC20 token deployed at address: $ERC20_ADDRESS"
+}
 
 # createGenesisConfig creates genesis configuration
 createGenesisConfig() {
@@ -47,16 +60,26 @@ case "$1" in
 
               proxyContractsAdmin=0x80cd9D056bc38ECA50cF74A7b9F4d0FB897152a2
 
+              "$BLADE_BIN" bridge fund \
+                --json-rpc http://rootchain:8545 \
+                --addresses ${proxyContractsAdmin} \
+                --amounts 1000000000000000000000000
+              
+              deployERC20
+
               createGenesisConfig "$2" "$secrets" \
                 --reward-wallet 0xDEADBEEF:1000000 \
-                --native-token-config "Blade:BLD:18:true" \
+                --native-token-config "Blade:BLD:18:false" \
                 --blade-admin $(echo "$secrets" | jq -r '.[0] | .address') \
                 --proxy-contracts-admin ${proxyContractsAdmin}
+
+              echo "ERC20 token address: $ERC20_ADDRESS"
 
               "$BLADE_BIN" bridge deploy \
                 --json-rpc http://rootchain:8545 \
                 --genesis /data/genesis.json \
                 --proxy-contracts-admin ${proxyContractsAdmin} \
+                --erc20-token ${ERC20_ADDRESS} \
                 --test
 
               addresses="$(echo "$secrets" | jq -r '.[0] | .address'),$(echo "$secrets" | jq -r '.[1] | .address'),$(echo "$secrets" | jq -r '.[2] | .address'),$(echo "$secrets" | jq -r '.[3] | .address')"

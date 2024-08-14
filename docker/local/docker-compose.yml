@@ -1,7 +1,6 @@
 version: '3.9'
 
 services:
-  ## Services from the first file
   rootchain:
     image: ethereum/client-go:latest
     container_name: blade-rootchain
@@ -63,8 +62,7 @@ services:
     container_name: blade-validator-2
     command: [
       "server",
-      "--data-dir",
-      "/data/data-2",
+      "--data-dir", "/data/data-2",
       "--chain", "/data/genesis.json",
       "--grpc-address", "0.0.0.0:9632",
       "--libp2p", "0.0.0.0:1478",
@@ -120,7 +118,7 @@ services:
     container_name: blade-validator-4
     command: [
       "server",
-      "--data-dir",  "/data/data-4",
+      "--data-dir", "/data/data-4",
       "--chain", "/data/genesis.json",
       "--grpc-address", "0.0.0.0:9632",
       "--libp2p", "0.0.0.0:1478",
@@ -143,112 +141,10 @@ services:
       - blade-docker-network
     restart: on-failure
 
-  ## Services from the second file
-  redis-db:
-    extends:
-      file: ./services/redis.yml
-      service: redis-db
-
-  db-init:
-    extends:
-      file: ./services/db.yml
-      service: db-init
-
-  db:
-    depends_on:
-      db-init:
-        condition: service_completed_successfully
-    extends:
-      file: ./services/db.yml
-      service: db
-
-  backend:
-    depends_on:
-      - db
-      - redis-db
-    extends:
-      file: ./services/backend.yml
-      service: backend
-    build:
-      context: ..
-      dockerfile: ./local/Dockerfile
-      args:
-        CACHE_EXCHANGE_RATES_PERIOD: ""
-        API_V1_READ_METHODS_DISABLED: "false"
-        DISABLE_WEBAPP: "false"
-        API_V1_WRITE_METHODS_DISABLED: "false"
-        CACHE_TOTAL_GAS_USAGE_COUNTER_ENABLED: ""
-        CACHE_ADDRESS_WITH_BALANCES_UPDATE_INTERVAL: ""
-        ADMIN_PANEL_ENABLED: ""
-        RELEASE_VERSION: 6.7.2
-    links:
-      - db:database
-    environment:
-        ETHEREUM_JSONRPC_HTTP_URL: http://blade-validator-1:8545/
-        ETHEREUM_JSONRPC_TRACE_URL: http://blade-validator-1:8545/
-        CHAIN_ID: '51001'
-
-  visualizer:
-    extends:
-      file: ./services/visualizer.yml
-      service: visualizer
-
-  sig-provider:
-    extends:
-      file: ./services/sig-provider.yml
-      service: sig-provider
-
-  frontend:
-    depends_on:
-      - backend
-    extends:
-      file: ./services/frontend.yml
-      service: frontend
-
-  stats-db-init:
-    extends:
-      file: ./services/stats.yml
-      service: stats-db-init
-
-  stats-db:
-    depends_on:
-      stats-db-init:
-        condition: service_completed_successfully
-    extends:
-      file: ./services/stats.yml
-      service: stats-db
-
-  stats:
-    depends_on:
-      - stats-db
-      - backend
-    extends:
-      file: ./services/stats.yml
-      service: stats
-
-  user-ops-indexer:
-    depends_on:
-      - db
-      - backend
-    extends:
-      file: ./services/user-ops-indexer.yml
-      service: user-ops-indexer
-
-  proxy:
-    depends_on:
-      - backend
-      - frontend
-      - stats
-    extends:
-      file: ./services/nginx.yml
-      service: proxy
-
-networks:
-  blade-docker-network:
-    driver: bridge
-    name: blade-docker-network
-
 volumes:
   data:
   eth1data:
-  genesis:
+
+networks:
+  blade-docker-network:
+    name: blade-docker-network
