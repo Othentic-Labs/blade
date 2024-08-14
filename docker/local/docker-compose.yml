@@ -3,7 +3,7 @@ version: '3.9'
 services:
   ## Services from the first file
   rootchain:
-    image: ghcr.io/0xpolygon/go-ethereum-console:latest
+    image: ethereum/client-go:latest
     container_name: blade-rootchain
     command: [
       "--dev",
