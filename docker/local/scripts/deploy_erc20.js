@@ -76,12 +76,11 @@ console.log('Wallet initialized with address:', wallet.address);
     console.log('Initial balance of the deploying wallet:', initialBalance.toString());
 
     // Send 100 tokens to each address in the fundAddresses list
-    const amountToSend = ethers.parseUnits('100', decimals);
+    const amountToSend = ethers.parseUnits('1000', decimals);
     for (const address of fundAddresses) {
-      console.log(`Sending 100 tokens from ${wallet.address} to ${address}...`);
+      console.log(`Sending 100 tokens to ${address}...`);
       const tx = await contract.connect(wallet).transfer(address, amountToSend);
       await tx.wait();
-      console.log(`Sent 100 tokens to ${address}`);
     }
 
     console.log('All token transfers completed.');

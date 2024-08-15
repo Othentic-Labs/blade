@@ -6,11 +6,18 @@ echo "Waiting for rootchain to be ready..."
 sleep 30
 
 BLADE_BIN=./blade
+GENESIS_FILE=/data/genesis.json
+ROOTCHAIN_URL=http://rootchain:8545
+NUM_OF_VALIDATORS=4
+STAKE_AMOUNT=500000000000000000000
+PREMINE_AMOUNT=500000000000000000000
+FUND_AMOUNT=100000000000000000000000000
+
 CHAIN_CUSTOM_OPTIONS=$(tr "\n" " " << EOL
 --block-gas-limit 10000000
 --epoch-size 10
 --chain-id 51001
---name Blade
+--name Othentic
 --premine 0x0000000000000000000000000000000000000000:0xD3C21BCECCEDA1000000
 EOL
 )
@@ -19,12 +26,12 @@ EOL
 deployERC20() {
   echo "Deploying ERC20 token on the rootchain..."
   node deploy_erc20.js \
-    "http://rootchain:8545" \
+    "$ROOTCHAIN_URL" \
     "71394bcfed7228c0a33a9e65b42ba8ce8a697ffdf15dc862aa7aece27819e938" \
     "DanielToken" \
     "DAN" \
     18 \
-    "100000000000000000000000000" \
+    "$FUND_AMOUNT" \
     "$addresses"
 
   ERC20_ADDRESS=$(cat /data/erc20_address.txt)
@@ -55,7 +62,7 @@ case "$1" in
       case "$2" in
           "polybft")
               echo "Generating PolyBFT secrets..."
-              secrets=$("$BLADE_BIN" secrets init --insecure --num 4 --data-dir /data/data- --json)
+              secrets=$("$BLADE_BIN" secrets init --insecure --num "$NUM_OF_VALIDATORS" --data-dir /data/data- --json)
               echo "Secrets have been successfully generated"
 
               rm -f /data/genesis.json
@@ -75,7 +82,7 @@ case "$1" in
 
               createGenesisConfig "$2" "$secrets" \
                 --reward-wallet 0xDEADBEEF:1000000 \
-                --native-token-config "Blade:BLD:18:false" \
+                --native-token-config "Othentic:OTH:18:false" \
                 --blade-admin $(echo "$secrets" | jq -r '.[0] | .address') \
                 --proxy-contracts-admin ${proxyContractsAdmin}
 
@@ -88,13 +95,40 @@ case "$1" in
                 --erc20-token ${ERC20_ADDRESS} \
                 --test
 
-
               "$BLADE_BIN" bridge fund \
                 --json-rpc http://rootchain:8545 \
                 --addresses ${addresses} \
                 --amounts 1000000000000000000000000,1000000000000000000000000,1000000000000000000000000,1000000000000000000000000
 
+              BLADE_MANAGER_ADDRESS=$(cat $GENESIS_FILE | jq -r '.params.engine.polybft.bridge.bladeManagerAddress')
+
+              echo "Bridge manager $BLADE_MANAGER_ADDRESS"
+
+              # Loop for register-validator
+              # for i in $(seq 1 $NUM_OF_VALIDATORS); do
+              #   "$BLADE_BIN" validator register-validator \
+              #     --data-dir /data/data-$i \
+              #     --jsonrpc "$ROOTCHAIN_URL" \
+              #     --stake-token "$ERC20_ADDRESS"
+              # done
+
+              # Loop for premine
+              for i in $(seq 1 $NUM_OF_VALIDATORS); do
+                "$BLADE_BIN" bridge premine --blade-manager "$BLADE_MANAGER_ADDRESS" \
+                  --data-dir /data/data-$i \
+                  --erc20-token "${ERC20_ADDRESS}" \
+                  --jsonrpc "$ROOTCHAIN_URL" \
+                  --stake-amount "$STAKE_AMOUNT" \
+                  --premine-amount "$PREMINE_AMOUNT"
+              done
+
+                # "$BLADE_BIN" bridge finalize-bridge --blade-manager "$BLADE_MANAGER_ADDRESS" \
+                #   --data-dir /data/data-1 \
+                #   --genesis "$GENESIS_FILE" \
+                #   --jsonrpc "http://rootchain:8545" 
+
               ;;
+
       esac
       ;;
   "start-node-1")
@@ -119,3 +153,8 @@ case "$1" in
       exec "$BLADE_BIN" "$@"
       ;;
 esac
+
+
+
+
+
